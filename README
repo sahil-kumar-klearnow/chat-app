@@ -1,8 +1,4 @@
-# 💬 Simple Chat Application
-
-![Python Version](https://img.shields.io/badge/python-3.x-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Architecture](https://img.shields.io/badge/architecture-client--server-orange.svg)
+# 💬Chat Application
 
 > A lightweight, multi-client network chat application built entirely using Python's native socket programming. 
 > Designed to demonstrate client-server architecture, TCP reliable communication, and concurrent connection handling!
@@ -17,7 +13,7 @@
 - **Join/Leave Notifications:** Global alerts notify the room when users join or quietly leave.
 - **Graceful Disconnects:** Built-in exception handling cleanly closes client connections when they leave unexpectedly.
 
-### ✨ Extra Credit / Enhancements Implemented
+### ✨ Enhancements Implemented
 | Feature | Description |
 | ------- | ----------- |
 | ⏱️ **Message Timestamps** | Shows exactly when messages were broadcasted (e.g. `[14:23:05]`). |
