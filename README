@@ -1,243 +1,83 @@
-🗨️Chat Application
-📌 Overview
+# 💬 Simple Chat Application
 
-This project is a multi-client network chat application built using Python socket programming.
-It follows a client–server architecture over TCP, allowing multiple users to connect to a central chat room and exchange messages in real time.
+![Python Version](https://img.shields.io/badge/python-3.x-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Architecture](https://img.shields.io/badge/architecture-client--server-orange.svg)
 
-The application demonstrates core networking concepts such as:
+> A lightweight, multi-client network chat application built entirely using Python's native socket programming. 
+> Designed to demonstrate client-server architecture, TCP reliable communication, and concurrent connection handling!
 
-TCP socket communication
+---
 
-Multi-threaded server design
+## 🚀 Features
 
-Concurrent client handling
+- **Reliable Networking:** TCP Socket Communication ensures ordered and reliable message delivery.
+- **Concurrent Clients:** The server leverages Python's `threading` module to smoothly handle multiple remote users simultaneously.
+- **Real-time Messaging:** Messages sent by any client are instantaneously broadcast to everyone else.
+- **Join/Leave Notifications:** Global alerts notify the room when users join or quietly leave.
+- **Graceful Disconnects:** Built-in exception handling cleanly closes client connections when they leave unexpectedly.
 
-Application-layer communication protocol
+### ✨ Extra Credit / Enhancements Implemented
+| Feature | Description |
+| ------- | ----------- |
+| ⏱️ **Message Timestamps** | Shows exactly when messages were broadcasted (e.g. `[14:23:05]`). |
+| 📋 **Server Logging** | Detailed active connection tracking printed within the server's console. |
+| 👥 **User List Command** | Clients can type `/list` on-demand to see exactly who is currently connected. |
 
-✨ Features
-🔗 TCP Socket Communication
+---
 
-Ensures reliable and ordered message delivery using the TCP protocol.
+## 📜 Application-Layer Protocol
 
-👥 Concurrent Clients
+The protocol dictates that all messages are sent as **UTF-8 encoded plain text strings**.
 
-The server uses Python's threading module to handle multiple users simultaneously.
+### Client ➡️ Server Commands:
 
-💬 Real-time Messaging
+* `JOIN <username>`: Sent immediately after connection to establish identity. (e.g., `JOIN Rahul`)
+* `MSG <message text>`: Sent whenever a user types a message in the chat. (e.g., `MSG Hello everyone!`)
+* `LIST`: Sent to request an array of all currently connected users.
+* `QUIT`: Sent to gracefully terminate the active connection.
 
-Messages sent by any client are broadcast to all other connected clients instantly.
+### Server ➡️ Client Responses:
 
-🔔 Join/Leave Notifications
+* 🗣️ **Broadcast Messages:** Text strings displayed to the active user. (e.g., `[14:23:05] Rahul: Hello everyone!`)
+* 🔔 **System Notifications:** Bracketed messages used for events. (e.g., `[Server] Rahul has joined the chat.`)
+* ❌ **Error Messages:** Messages starting with "Error: " if a protocol violation occurs.
 
-All users receive notifications whenever someone:
+---
 
-joins the chat
+## ⚙️ How to Run
 
-leaves the chat
+### Prerequisites
+- Python 3.x installed on your machine.
+- *No external networking libraries are required!*
 
-⚙️ Graceful Disconnects
-
-Handles unexpected client disconnections safely and cleans up connections properly.
-
-⭐ Extra Features Implemented
-🕒 Message Timestamps
-
-Each message includes a timestamp showing when it was broadcast.
-
-Example:
-
-[14:23:05] Rahul: Hello everyone!
-🖥️ Server Logging
-
-The server console logs important events such as:
-
-user connections
-
-user disconnections
-
-messages sent
-
-This helps during debugging and monitoring.
-
-👤 User List Command
-
-Clients can view all active users by typing:
-
-/list
-📡 Application-Layer Protocol
-
-All messages are transmitted as UTF-8 encoded plain text strings.
-
-Client → Server Commands
-JOIN <username>
-
-Sent immediately after connection to establish identity.
-
-Example:
-
-JOIN Rahul
-MSG <message>
-
-Sent whenever a user sends a chat message.
-
-Example:
-
-MSG Hello everyone!
-LIST
-
-Requests a list of currently connected users.
-
-QUIT
-
-Gracefully disconnects the client from the server.
-
-Server → Client Responses
-📢 Broadcast Messages
-
-Messages sent by users are broadcast to all connected clients.
-
-Example:
-
-[14:23:05] Rahul: Hello everyone!
-🔔 System Notifications
-
-Notifications about join/leave events.
-
-Example:
-
-[Server] Rahul has joined the chat.
-❗ Error Messages
-
-Sent when a protocol violation occurs.
-
-Example:
-
-Error: Username already exists
-🚀 Getting Started
-Prerequisites
-
-Make sure you have the following installed:
-
-Python 3.x
-
-No external libraries required
-
-The application only uses Python's built-in libraries:
-
-socket
-
-threading
-
-🖥️ Running the Server
-
-Navigate to the server directory:
-
+### 1. Running the Server 🖥️
+The server must be started first. Open a terminal and run:
+```bash
 cd server
-
-Run the server script:
-
 python server.py
+```
+*The server will start listening on port `65432` by default.*
 
-The server will start listening on port:
-
-65432
-💻 Running a Client
-
-Open a new terminal window
-
-Navigate to the client directory:
-
+### 2. Running a Client 💻
+Open a **new** terminal window (one for each user you want to simulate).
+```bash
 cd client
-
-Run the client script:
-
 python client.py
+```
 
-Enter your username when prompted.
+### 3. Usage & Commands ⌨️
+- Enter your desired username when prompted.
+- You can now type messages and see those from other users!
+- **Useful Commands:**
+  - `/list` : Display a list of currently connected users.
+  - `/quit` : Gracefully disconnect and exit the chat application.
 
-Start chatting!
+---
 
-Useful Client Commands
-Show Connected Users
-/list
-Exit the Chat
-/quit
-🏗️ Project Design
+## 🏗️ Technical Design
 
-The application consists of two main modules.
+The project is split into two independent modules:
 
-1️⃣ Server (server.py)
-
-Responsibilities:
-
-Listens for incoming client connections
-
-Spawns a new thread for each client
-
-Maintains active users in a global dictionary:
-
-clients = { username : connection }
-Server Workflow
-
-Accept client connection
-
-Receive JOIN command
-
-Register the client
-
-Start handle_client thread
-
-Broadcast incoming messages to other users
-
-Thread Safety
-
-Since multiple threads modify shared resources, a thread lock is used to prevent race conditions:
-
-threading.Lock()
-2️⃣ Client (client.py)
-
-Responsibilities:
-
-Connect to the server
-
-Handle user input
-
-Display incoming messages
-
-Client Thread Model
-
-The client uses two threads:
-
-Main Thread
-
-Waits for user input (stdin)
-
-Sends messages to the server
-
-Receiver Thread
-
-Continuously listens for messages from the server
-
-Prints them to the terminal
-
-This ensures asynchronous communication, allowing users to receive messages while typing.
-
-📁 Project Structure
-chat-app
-│
-├── client
-│   └── client.py
-│
-├── server
-│   └── server.py
-│
-└── README.md
-🔧 Technologies Used
-
-Python
-
-TCP Socket Programming
-
-Multithreading
-
-Client–Server Architecture
+1. **Server (`server.py`)**: Responsible for listening for incoming client sockets. Upon a valid connection, it spawns a daemon thread `handle_client` to actively listen to messages sent by that specific client while holding the current active connections in a global mapped dictionary `clients`. Thread safety is ensured using a `Lock()` when mutating global variables.
+2. **Client (`client.py`)**: Responsible for managing the UI (console) and network input/output. It connects to the server and uses a daemon thread to independently listen to server messages to print them asynchronously, while the main thread simultaneously waits for user input from standard in (`sys.stdin`) to build and send the request protocol buffers.
