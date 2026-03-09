@@ -1,0 +1,40 @@
+# Simple Chat Application Report
+
+## 1. Architecture Design
+The architecture of this chat application comprises two fundamental entities: a multi-threaded Server and a dual-threaded Client. All network interactions occur over TCP, satisfying the requirement for reliable, ordered communication.
+
+### Single Server Component
+The server is structured to continually accept connections on a specific port. Once it receives an incoming TCP connection, it delegates the handling of that single client to an independent thread. A centralized state parameter, specifically a mapped dictionary, holds the connections `username -> connection`. This dictionary enables broadcasting messages systematically. When one client sends a message, the server simply iterates through all keys in the dictionary (excluding the sender) and relays the information format. 
+
+### Multi-Client Component
+The clients are uniquely built to handle asynchronous behavior in reading input from servers while also waiting for the user to type over stdin. To gracefully implement this flow, the client script launches a daemon receive thread upon an initial "JOIN" request to constantly `.recv()` data. Simultaneous interaction ensures the UI seamlessly captures live responses during active typing. 
+
+## 2. Concurrency Approach
+Concurrency on the server relies heavily on Python's built-in `threading` library instead of a thread pool or asynchronous socket implementation (e.g. `asyncio`, `select`, etc.). Our requirement stated "Multi-threaded server, Thread pool, or Non-blocking I/O". A multi-threaded architecture was designated due to its simplicity in writing straightforward synchronous I/O operations without complex loops for event handling. Python `threading.Thread` instances are spawned for:
+1. Every newly accepted socket to handle that client's I/O flow.
+2. Background routines like disconnecting notifications to prevent deadlock since the threads lock global dictionaries.
+
+### Thread Safety 
+Since dictionaries mapping the user state can be concurrently verified or modified by multiple users jumping in and out of the chat log, a global `threading.Lock()` was introduced. Any modifications using `clients[conn]` or iteration sequences of active connections acquire the lock before operation.
+
+## 3. Communication Protocol
+A text-based application-level protocol was introduced using specific keywords. It ensures messages are easily parsed by both client and server limits logic complexity and ensures transparency:
+1. `JOIN <username>` initiates the joining sequence. If missing, the server prompts an error requiring authentication first.
+2. `MSG <message>` prefix ensures the message differs from system and user commands like `/quit`.
+3. `LIST` and `QUIT` provide easy-to-use controls that map directly to functional requirements.
+
+## 4. Testing & Robustness Insights
+The following constraints and edge cases were deliberately verified out throughout testing simulations:
+1. **Multiple Clients Joining:** 10 diverse terminal instances running the Python client simultaneously joined the room with varying usernames. Performance overhead from threads resolving concurrent connections remained virtually indistinguishable due to OS context switching.
+2. **Simultaneous Messaging:** Clients aggressively triggered continuous packets using scripts. Thread Locks flawlessly prevented race conditions and iteration exceptions dynamically allocating dictionary sizes on the background.
+3. **Empty or Long Messages:** Tested inserting blank commands and lengthy arrays. Packets were safely buffered beneath the 4096-byte parameter logic restricting buffer overflow errors without affecting other processes.
+4. **Client Disconnection or Fatal Crash:** Emulated Ctrl+C or manual terminal kills simulating packet failure connection reset (`ConnectionResetError`). Our server gracefully handles the exception and cascades the "remove_client" routine. All peers are actively notified that the target "unexpectedly" quit, and socket cleanup averts hanging pointers.
+
+## 5. Challenges Encountered & Resolutions
+- **Deadlocks during Disconnection:** Initially, the architecture implemented a straightforward removal process that iterated across everyone to send disconnect announcements using `broadcast()`. Calling `broadcast()` while within `remove_client` which internally holds `clients_lock`, caused an initial thread-freeze (deadlock scenario). This logical flaw was fixed by offloading the broadcast disconnected notification function to a separate daemon thread after cleaning up internal states, avoiding simultaneous locking requests.
+- **Asynchronous User Interaction UI:** Real-time messages arriving onto the terminal visually interrupted any user currently composing arbitrary message inputs. Although impossible to completely patch natively in command shells unless standard input buffer hooks (like `curses`) are introduced, prepending incoming messages with backspaces and carriage return keys `\r` reduced the impact significantly. 
+
+## 6. Added Enhancements (Extra Credit)
+- Message timestamps were appended onto all valid conversational streams resolving order queries.
+- `LIST` function parsing `clients.values()` resolving "who is currently active here".
+- Real-time logging console implementation over standard `.print()` outputting formatted analytics dynamically from the server terminal perspective (helpful during remote diagnostics).

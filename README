@@ -1,0 +1,61 @@
+# Simple Chat Application
+
+## Overview
+This is a multi-client network chat application built using Python socket programming. It uses a client-server architecture over TCP to allow multiple users to connect, join a central chat room, and exchange messages in real-time.
+
+## Features
+- **TCP Socket Communication:** Reliable and ordered message delivery.
+- **Concurrent Clients:** The server uses Python's `threading` module to handle multiple users simultaneously.
+- **Real-time Messaging:** Messages sent by a client are broadcast to all other connected clients.
+- **Join/Leave Notifications:** Alerts are broadcast when users join or quietly leave the room.
+- **Graceful Disconnects:** Handling and clean-up of client connections when they leave unexpectedly.
+- **Extra Credit Implemented:**
+  - **Message Timestamps:** Showing exactly at what time messages were broadcasted.
+  - **Server Logging:** Keeping track of connections and messages in the server's console.
+  - **User List Command:** Clients can type `/list` to see who is currently connected.
+
+## Application-Layer Protocol
+The communication protocol dictates that all messages are sent as UTF-8 encoded plain text strings.
+
+### Client to Server commands:
+1. `JOIN <username>`: Sent immediately after connection to establish identity. (e.g., `JOIN Alice`)
+2. `MSG <message text>`: Sent whenever a user types a message in the chat. (e.g., `MSG Hello everyone!`)
+3. `LIST`: Sent to request all currently connected users.
+4. `QUIT`: Sent to gracefully terminate the connection.
+
+### Server to Client responses:
+- **Broadcast Messages:** Formatted text strings to display to the user. (e.g., `[14:23:05] Alice: Hello everyone!`)
+- **System Notifications:** Bracketed messages used for events. (e.g., `[Server] Alice has joined the chat.`)
+- **Error Messages:** Messages starting with "Error: " if a protocol violation occurs.
+
+## Instructions
+
+### Prerequisites
+- Python 3.x installed on your machine.
+- No external networking libraries are required; it uses Python's standard `socket` and `threading` libraries.
+
+### Running the Server
+1. Navigate to the `server` directory.
+2. Run the `server.py` script:
+   ```bash
+   python server.py
+   ```
+   The server will start listening on port `65432` by default.
+
+### Running a Client
+1. Open a new terminal window.
+2. Navigate to the `client` directory.
+3. Run the `client.py` script:
+   ```bash
+   python client.py
+   ```
+4. Enter your desired username when prompted.
+5. You can now type messages and see messages from other users. 
+6. Useful commands:
+   - Type `/list` to see a list of connected users.
+   - Type `/quit` to gracefully disconnect and exit the chat application.
+
+## Design
+The project is split into two independent modules:
+1. **Server (`server.py`)**: Responsible for listening for incoming client sockets. Upon a valid connection, it spawns a daemon thread `handle_client` to actively listen to messages sent by that specific client while holding the current active connections in a global mapped dictionary `clients`. Thread safety is ensured using a lock when mutating the global variables.
+2. **Client (`client.py`)**: Responsible for managing the UI (console) and network input/output. It connects to the server and uses a thread to independently listen to server messages to print them asynchronously, while the main thread waits for user input from standard in (`sys.stdin`) to build and send the request protocol buffers.
