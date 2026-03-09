@@ -1,21 +1,22 @@
-# 💬Chat Application
+# 💬 Chat Application
 
-> A lightweight, multi-client network chat application built entirely using Python's native socket programming. 
+> A lightweight, multi-client network chat application built entirely using Python's native socket programming.  
 > Designed to demonstrate client-server architecture, TCP reliable communication, and concurrent connection handling!
 
 ---
 
 ## 🚀 Features
 
-- **Reliable Networking:** TCP Socket Communication ensures ordered and reliable message delivery.
-- **Concurrent Clients:** The server leverages Python's `threading` module to smoothly handle multiple remote users simultaneously.
-- **Real-time Messaging:** Messages sent by any client are instantaneously broadcast to everyone else.
-- **Join/Leave Notifications:** Global alerts notify the room when users join or quietly leave.
-- **Graceful Disconnects:** Built-in exception handling cleanly closes client connections when they leave unexpectedly.
+* **Reliable Networking:** TCP Socket Communication ensures ordered and reliable message delivery.
+* **Concurrent Clients:** The server leverages Python's `threading` module to smoothly handle multiple remote users simultaneously.
+* **Real-time Messaging:** Messages sent by any client are instantaneously broadcast to everyone else.
+* **Join/Leave Notifications:** Global alerts notify the room when users join or quietly leave.
+* **Graceful Disconnects:** Built-in exception handling cleanly closes client connections when they leave unexpectedly.
 
 ### ✨ Enhancements Implemented
+
 | Feature | Description |
-| ------- | ----------- |
+| :--- | :--- |
 | ⏱️ **Message Timestamps** | Shows exactly when messages were broadcasted (e.g. `[14:23:05]`). |
 | 📋 **Server Logging** | Detailed active connection tracking printed within the server's console. |
 | 👥 **User List Command** | Clients can type `/list` on-demand to see exactly who is currently connected. |
@@ -44,36 +45,38 @@ The protocol dictates that all messages are sent as **UTF-8 encoded plain text s
 ## ⚙️ How to Run
 
 ### Prerequisites
-- Python 3.x installed on your machine.
-- *No external networking libraries are required!*
+* Python 3.x installed on your machine.
+* *No external networking libraries are required!*
 
 ### 1. Running the Server 🖥️
 The server must be started first. Open a terminal and run:
 ```bash
 cd server
 python server.py
-```
-*The server will start listening on port `65432` by default.*
 
-### 2. Running a Client 💻
-Open a **new** terminal window (one for each user you want to simulate).
+The server will start listening on port 65432 by default.
+
+2. Running a Client 💻
+Open a new terminal window (one for each user you want to simulate).
+
 ```bash
 cd client
 python client.py
-```
 
-### 3. Usage & Commands ⌨️
-- Enter your desired username when prompted.
-- You can now type messages and see those from other users!
-- **Useful Commands:**
-  - `/list` : Display a list of currently connected users.
-  - `/quit` : Gracefully disconnect and exit the chat application.
+3. Usage & Commands ⌨️
+Enter your desired username when prompted.
 
----
+You can now type messages and see those from other users!
 
-## 🏗️ Technical Design
+Useful Commands:
 
+/list : Display a list of currently connected users.
+
+/quit : Gracefully disconnect and exit the chat application.
+
+🏗️ Technical Design
 The project is split into two independent modules:
 
-1. **Server (`server.py`)**: Responsible for listening for incoming client sockets. Upon a valid connection, it spawns a daemon thread `handle_client` to actively listen to messages sent by that specific client while holding the current active connections in a global mapped dictionary `clients`. Thread safety is ensured using a `Lock()` when mutating global variables.
-2. **Client (`client.py`)**: Responsible for managing the UI (console) and network input/output. It connects to the server and uses a daemon thread to independently listen to server messages to print them asynchronously, while the main thread simultaneously waits for user input from standard in (`sys.stdin`) to build and send the request protocol buffers.
+Server (server.py): Responsible for listening for incoming client sockets. Upon a valid connection, it spawns a daemon thread handle_client to actively listen to messages sent by that specific client while holding the current active connections in a global mapped dictionary clients. Thread safety is ensured using a Lock() when mutating global variables.
+
+Client (client.py): Responsible for managing the UI (console) and network input/output. It connects to the server and uses a daemon thread to independently listen to server messages to print them asynchronously, while the main thread simultaneously waits for user input from standard in (sys.stdin) to build and send the request protocol buffers.
