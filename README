@@ -18,14 +18,14 @@ This is a multi-client network chat application built using Python socket progra
 The communication protocol dictates that all messages are sent as UTF-8 encoded plain text strings.
 
 ### Client to Server commands:
-1. `JOIN <username>`: Sent immediately after connection to establish identity. (e.g., `JOIN Alice`)
+1. `JOIN <username>`: Sent immediately after connection to establish identity. (e.g., `JOIN Rahul`)
 2. `MSG <message text>`: Sent whenever a user types a message in the chat. (e.g., `MSG Hello everyone!`)
 3. `LIST`: Sent to request all currently connected users.
 4. `QUIT`: Sent to gracefully terminate the connection.
 
 ### Server to Client responses:
-- **Broadcast Messages:** Formatted text strings to display to the user. (e.g., `[14:23:05] Alice: Hello everyone!`)
-- **System Notifications:** Bracketed messages used for events. (e.g., `[Server] Alice has joined the chat.`)
+- **Broadcast Messages:** Formatted text strings to display to the user. (e.g., `[14:23:05] Rahul: Hello everyone!`)
+- **System Notifications:** Bracketed messages used for events. (e.g., `[Server] Rahul has joined the chat.`)
 - **Error Messages:** Messages starting with "Error: " if a protocol violation occurs.
 
 ## Instructions
